@@ -1,0 +1,75 @@
+.document-list-page {
+  padding-top: 30px;
+}
+
+.page-title {
+  color: #E0E0E0;
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.filters-section, .document-actions, .document-table-container {
+  margin-bottom: 25px;
+  background-color: #282840; /* Un tono un poco más claro que el fondo general para las tarjetas */
+}
+
+.filters-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.select-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #33334F;
+  background-color: #33334F;
+  color: #E0E0E0;
+  border-radius: 5px;
+  font-size: 1rem;
+  appearance: none; /* Quita el estilo nativo del select */
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23E0E0E0" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  box-sizing: border-box;
+}
+
+.select-input:focus {
+  outline: none;
+  border-color: #0F3460;
+  box-shadow: 0 0 0 2px rgba(15, 52, 96, 0.5);
+}
+
+.document-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.document-table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table thead {
+  background-color: #0F3460;
+}
+
+table th {
+  padding: 15px;
+  text-align: left;
+  color: #E0E0E0;
+  font-weight: bold;
+  border-bottom: 1px solid #33334F;
+}

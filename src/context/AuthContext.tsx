@@ -6,7 +6,6 @@ import {
   useEffect,
 } from "react";
 
-// Definir el tipo de usuario según lo que devuelve tu backend
 interface User {
   id: number;
   name: string;

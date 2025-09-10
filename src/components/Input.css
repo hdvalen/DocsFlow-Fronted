@@ -1,0 +1,37 @@
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  color: #A0A0A0;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #33334F;
+  background-color: #282840; /* Ligeramente más claro que el fondo principal */
+  color: #E0E0E0;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #0F3460;
+  box-shadow: 0 0 0 2px rgba(15, 52, 96, 0.5); /* Sombra de acento al enfocar */
+}
+
+.input-error {
+  border-color: #F44336 !important;
+}
+
+.error-message {
+  color: #F44336;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  display: block;
+}
