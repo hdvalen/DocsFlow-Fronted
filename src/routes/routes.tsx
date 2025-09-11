@@ -1,12 +1,28 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login from "../pages/Login";
-import Dashboard from "../pages/Dashboard";
+import Login from "../pages/Auth/Login"; 
+import Dashboard from "../pages/Documents/DocumentList"; 
 import { useAuth } from "../context/AuthContext";
 import type { JSX } from "react";
 
-const PrivateRoute = ({ children }: { children: JSX.Element }) => {
-  const { token } = useAuth();
-  return token ? children : <Navigate to="/login" />;
+// Rutas privadas
+const PrivateRoute = ({
+  children,
+  roles,
+}: {
+  children: JSX.Element;
+  roles?: string[];
+}) => {
+  const { token, user } = useAuth();
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (roles && !roles.includes(user?.role || "")) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  return children;
 };
 
 const AppRoutes = () => {
@@ -20,14 +36,17 @@ const AppRoutes = () => {
         <Route
           path="/dashboard"
           element={
-            <PrivateRoute>
+            <PrivateRoute roles={["admin", "operator"]}>
               <Dashboard />
             </PrivateRoute>
           }
         />
 
-        {/* redirigir a login si no existe ruta */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        {/* página acceso denegado */}
+        <Route path="/unauthorized" element={<h2>🚫 Acceso denegado</h2>} />
+
+        {/* fallback */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );

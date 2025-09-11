@@ -10,7 +10,9 @@ interface User {
   id: number;
   name: string;
   email: string;
-  role: "admin" | "operator";
+  role: string; 
+  company_id?: number;
+  department_id?: number;
 }
 
 interface AuthContextType {

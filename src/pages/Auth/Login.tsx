@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import './Auth.css';
+import BackgroundStars from '../../components/Background';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>('');
@@ -15,25 +16,34 @@ const Login: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
-      // Aquí iría la llamada a tu API de login
-      console.log('Login attempt with:', { email, password });
-      // Simulación de API con credenciales fijas
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      if (email === 'admin@admin.com' && password === 'admin') {
-        localStorage.setItem('token', 'fake-admin-token');
-        localStorage.setItem('role', 'admin');
-        navigate('/documents');
-      } else if (email === 'operator@docsflow.com' && password === 'operator') {
-        localStorage.setItem('token', 'fake-operator-token');
-        localStorage.setItem('role', 'operator');
-        navigate('/documents');
-      } else {
-        setError('Credenciales inválidas. Intenta con admin@admin.com / admin');
+      const response = await fetch('http://localhost:8000/Auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || 'Error en el login');
       }
-    } catch (err) {
-      setError('Ocurrió un error al iniciar sesión.');
-      console.error(err);
+
+      const data = await response.json();
+
+      // 🔑 Guardamos token y user en localStorage
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('role', data.user.role);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // Redirigir al dashboard
+      navigate('/documents');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || 'Ocurrió un error al iniciar sesión.');
+      } else {
+        setError('Ocurrió un error al iniciar sesión.');
+      }
     } finally {
       setLoading(false);
     }
@@ -41,6 +51,8 @@ const Login: React.FC = () => {
 
   return (
     <div className="auth-page">
+      <BackgroundStars />
+
       <div className="auth-card">
         <h2>Iniciar Sesión</h2>
         <p className="subtitle">Accede a tu plataforma DocsFlow.</p>
@@ -51,7 +63,7 @@ const Login: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="admin@admin.com"
+            placeholder="correo"
           />
           <Input
             label="Contraseña"
@@ -59,7 +71,7 @@ const Login: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            placeholder="admin"
+            placeholder="contraseña"
           />
           {error && <p className="error-message auth-error">{error}</p>}
           <Button type="submit" disabled={loading}>

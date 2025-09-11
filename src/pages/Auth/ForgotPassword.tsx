@@ -11,22 +11,33 @@ const ForgotPassword: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
-    setError(null);
-    try {
-      // Lógica para enviar el correo de recuperación
-      console.log('Sending reset link to:', email);
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulación
-      setMessage('Si el correo existe, recibirás un enlace para restablecer tu contraseña.');
-    } catch (err) {
-      setError('Ocurrió un error al enviar el correo.');
-      console.error(err);
-    } finally {
-      setLoading(false);
+  e.preventDefault();
+  setLoading(true);
+  setMessage(null);
+  setError(null);
+
+  try {
+    const response = await fetch("http://localhost:8000/api/auth/forgot-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al enviar el correo");
     }
-  };
+
+    const data = await response.json();
+    setMessage(data.message || "Recibirás un enlace para restablecer tu contraseña.");
+  } catch (err) {
+    setError("Ocurrió un error al enviar el correo.");
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-page">

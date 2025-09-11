@@ -4,12 +4,12 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #1A1A2E; /* Fondo oscuro principal */
+  background-color: #0d0d1f; /* Fondo oscuro principal */
   color: #E0E0E0; /* Texto principal claro */
 }
 
 a {
-  color: #0F3460; /* Enlaces con el color de acento */
+  color: #2b0f60; /* Enlaces con el color de acento */
   text-decoration: none;
 }
 
@@ -22,8 +22,8 @@ input[type="text"],
 input[type="password"],
 input[type="email"],
 textarea {
-  background-color: #33334F; /* Fondo de input más oscuro */
-  border: 1px solid #0F3460; /* Borde de acento */
+  background-color: #272735ce; /* Fondo de input más oscuro */
+  border: 1px solid #161224; /* Borde de acento */
   color: #E0E0E0;
   padding: 10px;
   border-radius: 5px;
@@ -32,7 +32,7 @@ textarea {
 }
 
 button {
-  background-color: #0F3460; /* Botones con color de acento */
+  background-color: #131031; /* Botones con color de acento */
   color: #E0E0E0;
   border: none;
   padding: 10px 20px;
@@ -43,7 +43,7 @@ button {
 }
 
 button:hover {
-  background-color: #1A4A80; /* Un tono un poco más claro al pasar el mouse */
+  background-color: #25293d; /* Un tono un poco más claro al pasar el mouse */
 }
 
 .container {
