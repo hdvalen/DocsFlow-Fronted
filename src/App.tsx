@@ -1,42 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext'; // Ajusta la ruta si es necesario
+
+// Páginas
 import Login from './pages/Auth/Login';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 import Register from './pages/Auth/Register';
 import ResetPassword from './pages/Auth/ResetPassword';
 import DocumentList from './pages/Documents/DocumentList';
+
+// Componentes
 import Navbar from './components/Navbar';
 import './App.css';
 
+// Layout que envuelve rutas privadas
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!localStorage.getItem('token'));
-  const [isAdmin, setIsAdmin] = useState<boolean>(localStorage.getItem('role') === 'admin');
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-    setIsAuthenticated(!!token);
-    setIsAdmin(role === 'admin');
-
-    if (!token && !['/login', '/forgot-password', '/reset-password'].includes(location.pathname)) {
-      navigate('/login');
-    }
-
-  }, [location.pathname, navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    setIsAuthenticated(false);
-    setIsAdmin(false);
-    navigate('/login');
-  };
+  const { user, logout } = useAuth();
 
   return (
     <>
-      <Navbar isAuthenticated={isAuthenticated} isAdmin={isAdmin} onLogout={handleLogout} />
+      <Navbar
+        isAuthenticated={!!user}
+        isAdmin={user?.role === 'admin'}
+        onLogout={logout}
+      />
       <main className="main-content">
         {children}
       </main>
@@ -44,21 +31,52 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
+// Componente para proteger rutas privadas
+const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 const App: React.FC = () => {
   return (
-    <Router>
-     
-      <Routes>
-        {/* Rutas Públicas */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/register" element={<Register />} />
-        {/* Rutas Privadas */}
-        <Route path="/" element={<Layout><DocumentList /></Layout>} />
-        <Route path="/documents" element={<Layout><DocumentList /></Layout>} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Rutas Públicas */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Rutas Privadas */}
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <DocumentList />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/documents"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <DocumentList />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 

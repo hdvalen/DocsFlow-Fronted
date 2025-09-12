@@ -18,7 +18,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, isAdmin, onLogout }) =
         {isAuthenticated ? (
           <>
             <li><Link to="/documents">Documentos</Link></li>
-            {isAdmin && <li><Link to="/users">Usuarios</Link></li>} {/* Esta ruta aún no existe */}
+            { isAdmin && <li><Link to="/users">Usuarios</Link></li>/* Esta ruta aún no existe */}
             <li><button onClick={onLogout} className="logout-button">Cerrar Sesión</button></li>
           </>
         ) : (
