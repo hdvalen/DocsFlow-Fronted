@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import Input from  '../../components/Input';
+import Input from '../../components/Input';
 import Button from '../../components/Button';
+import { useAuth } from '../../context/AuthContext'; 
 import './Documents.css';
 
 interface Document {
-  id: string;
-  name: string;
+  id: number;
+  title: string;
+  department_id: number;
   department: string;
+  uploaded_by: number;
   uploadDate: string;
-  type: string;
+  doc_type: string;
 }
 
 const DocumentList: React.FC = () => {
+  const { token } = useAuth();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,34 +24,41 @@ const DocumentList: React.FC = () => {
   const [filterType, setFilterType] = useState<string>('');
 
   useEffect(() => {
-    // Simular carga de documentos
     const fetchDocuments = async () => {
       setLoading(true);
+      setError(null);
+
+      if (!token) {
+        setError("No estás autenticado");
+        setLoading(false);
+        return;
+      }
+
       try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const dummyDocuments: Document[] = [
-          { id: '1', name: 'Contrato A.pdf', department: 'Legal', uploadDate: '2023-10-26', type: 'Contrato' },
-          { id: '2', name: 'Informe Q3.pdf', department: 'Finanzas', uploadDate: '2023-09-15', type: 'Informe' },
-          { id: '3', name: 'Manual Operaciones.pdf', department: 'Operaciones', uploadDate: '2023-08-01', type: 'Manual' },
-          { id: '4', name: 'Factura Proveedor.pdf', department: 'Compras', uploadDate: '2023-10-20', type: 'Factura' },
-          { id: '5', name: 'Política Privacidad.pdf', department: 'Legal', uploadDate: '2023-10-05', type: 'Política' },
-          { id: '6', name: 'Reporte Anual.pdf', department: 'Finanzas', uploadDate: '2023-07-01', type: 'Informe' },
-        ];
-        setDocuments(dummyDocuments);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const res = await fetch("http://localhost:8000/documents/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) throw new Error("Error al cargar documentos");
+
+        const data = await res.json();
+        setDocuments(data.documents);
       } catch (err) {
-        setError('Error al cargar los documentos.');
+        console.error(err);
+        setError("Error de conexión con el servidor");
       } finally {
         setLoading(false);
       }
     };
-    fetchDocuments();
-  }, []);
 
-  const filteredDocuments = documents.filter(doc =>
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (filterDepartment === '' || doc.department === filterDepartment) &&
-    (filterType === '' || doc.type === filterType)
+    fetchDocuments();
+  }, [token]);
+
+  const filteredDocuments = documents.filter(
+    (doc) =>
+      doc.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (filterDepartment === '' || doc.department === filterDepartment) &&
+      (filterType === '' || doc.doc_type === filterType)
   );
 
   return (
@@ -55,43 +66,35 @@ const DocumentList: React.FC = () => {
       <h1 className="page-title">Gestión de Documentos</h1>
 
       <div className="filters-section card">
-        <div className="filter-group">
-          <Input
-            type="text"
-            placeholder="Buscar por nombre..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="filter-group">
-          <select
-            value={filterDepartment}
-            onChange={(e) => setFilterDepartment(e.target.value)}
-            className="select-input"
-          >
-            <option value="">Todos los Departamentos</option>
-            {/* Aquí deberías cargar los departamentos dinámicamente de tu API */}
-            <option value="Legal">Legal</option>
-            <option value="Finanzas">Finanzas</option>
-            <option value="Operaciones">Operaciones</option>
-            <option value="Compras">Compras</option>
-          </select>
-        </div>
-        <div className="filter-group">
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="select-input"
-          >
-            <option value="">Todos los Tipos</option>
-            {/* Aquí deberías cargar los tipos de documento dinámicamente */}
-            <option value="Contrato">Contrato</option>
-            <option value="Informe">Informe</option>
-            <option value="Manual">Manual</option>
-            <option value="Factura">Factura</option>
-            <option value="Política">Política</option>
-          </select>
-        </div>
+        <Input
+          type="text"
+          placeholder="Buscar por nombre..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select
+          value={filterDepartment}
+          onChange={(e) => setFilterDepartment(e.target.value)}
+          className="select-input"
+        >
+          <option value="">Todos los Departamentos</option>
+          <option value="Legal">Legal</option>
+          <option value="Finanzas">Finanzas</option>
+          <option value="Operaciones">Operaciones</option>
+          <option value="Compras">Compras</option>
+        </select>
+        <select
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+          className="select-input"
+        >
+          <option value="">Todos los Tipos</option>
+          <option value="Contrato">Contrato</option>
+          <option value="Informe">Informe</option>
+          <option value="Manual">Manual</option>
+          <option value="Factura">Factura</option>
+          <option value="Política">Política</option>
+        </select>
         <Button onClick={() => { setSearchTerm(''); setFilterDepartment(''); setFilterType(''); }}>
           Limpiar Filtros
         </Button>
@@ -121,12 +124,12 @@ const DocumentList: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredDocuments.map(doc => (
+                {filteredDocuments.map((doc) => (
                   <tr key={doc.id}>
-                    <td>{doc.name}</td>
+                    <td>{doc.title}</td>
                     <td>{doc.department}</td>
                     <td>{doc.uploadDate}</td>
-                    <td>{doc.type}</td>
+                    <td>{doc.doc_type}</td>
                     <td>
                       <Button variant="secondary" style={{ marginRight: '10px' }}>Ver</Button>
                       <Button variant="danger">Eliminar</Button>

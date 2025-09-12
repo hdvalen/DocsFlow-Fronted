@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import './Auth.css';
 
 const ResetPassword: React.FC = () => {
-  const { token } = useParams<{ token: string }>(); // Obtener el token de la URL
-  const [newPassword, setNewPassword] = useState<string>('');
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // extraer el token del query param
+  const queryParams = new URLSearchParams(location.search);
+  const token = queryParams.get("token");
+
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,20 +24,23 @@ const ResetPassword: React.FC = () => {
     setMessage(null);
     setError(null);
 
-    if (newPassword !== confirmPassword) {
-      setError('Las contraseñas no coinciden.');
-      setLoading(false);
-      return;
-    }
-
     try {
-      // Lógica para restablecer la contraseña con el token y la nueva contraseña
-      console.log('Resetting password for token:', token, 'with new password:', newPassword);
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulación
-      setMessage('Tu contraseña ha sido restablecida exitosamente.');
-      setTimeout(() => navigate('/login'), 3000); // Redirigir al login
+      const response = await fetch('http://localhost:8000/email/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, new_password: newPassword, confirm_password: confirmPassword })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.detail || 'Ocurrió un error al restablecer la contraseña');
+      } else {
+        setMessage(data.msg);
+        setTimeout(() => navigate('/login'), 3000);
+      }
     } catch (err) {
-      setError('Ocurrió un error al restablecer la contraseña o el token es inválido.');
+      setError('Error de conexión con el servidor');
       console.error(err);
     } finally {
       setLoading(false);

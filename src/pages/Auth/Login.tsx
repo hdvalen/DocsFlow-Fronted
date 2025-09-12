@@ -78,9 +78,11 @@ const Login: React.FC = () => {
             {loading ? 'Cargando...' : 'Iniciar Sesión'}
           </Button>
         </form>
+        <p className="auth-link">¿No tienes una cuenta? <Link to="/register">Regístrate</Link></p>
         <p className="auth-link">
           ¿Olvidaste tu contraseña? <Link to="/forgot-password">Recuperar</Link>
         </p>
+
       </div>
     </div>
   );

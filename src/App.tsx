@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Login from './pages/Auth/Login';
 import ForgotPassword from './pages/Auth/ForgotPassword';
+import Register from './pages/Auth/Register';
 import ResetPassword from './pages/Auth/ResetPassword';
 import DocumentList from './pages/Documents/DocumentList';
 import Navbar from './components/Navbar';
@@ -22,6 +23,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (!token && !['/login', '/forgot-password', '/reset-password'].includes(location.pathname)) {
       navigate('/login');
     }
+
   }, [location.pathname, navigate]);
 
   const handleLogout = () => {
@@ -50,8 +52,8 @@ const App: React.FC = () => {
         {/* Rutas Públicas */}
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/register" element={<Register />} />
         {/* Rutas Privadas */}
         <Route path="/" element={<Layout><DocumentList /></Layout>} />
         <Route path="/documents" element={<Layout><DocumentList /></Layout>} />

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import "./Auth.css";
@@ -9,9 +9,8 @@ const Register: React.FC = () => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [companyId, setCompanyId] = useState<string>(""); // relación con companies
-  const [departmentId, setDepartmentId] = useState<string>(""); // relación con departments
   const [loading, setLoading] = useState<boolean>(false);
+  const [role, setRole] = useState<string>("operator"); // Rol por defecto
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -24,15 +23,14 @@ const Register: React.FC = () => {
     setSuccess(null);
 
     try {
-      const response = await fetch("http://localhost:8000/auth/register", {
+      const response = await fetch("http://localhost:8000/users/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
           email,
           password,
-          company_id: Number(companyId),
-          department_id: Number(departmentId),
+          role
         }),
       });
 
@@ -87,20 +85,12 @@ const Register: React.FC = () => {
             placeholder="********"
           />
           <Input
-            label="Empresa (ID)"
-            type="number"
-            value={companyId}
-            onChange={(e) => setCompanyId(e.target.value)}
+            label="Rol"
+            type="text"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
             required
-            placeholder="Ej: 1"
-          />
-          <Input
-            label="Departamento (ID)"
-            type="number"
-            value={departmentId}
-            onChange={(e) => setDepartmentId(e.target.value)}
-            required
-            placeholder="Ej: 3"
+            placeholder="admin o user"
           />
 
           {error && <p className="error-message auth-error">{error}</p>}
@@ -109,7 +99,11 @@ const Register: React.FC = () => {
           <Button type="submit" disabled={loading}>
             {loading ? "Registrando..." : "Registrarse"}
           </Button>
+          
         </form>
+         <p className="auth-link">
+          <Link to="/login">Volver al inicio de sesión</Link>
+        </p>
       </div>
     </div>
   );
