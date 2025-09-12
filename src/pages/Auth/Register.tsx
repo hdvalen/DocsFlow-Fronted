@@ -10,7 +10,7 @@ const Register: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [role, setRole] = useState<string>("operator"); // Rol por defecto
+  const [role, setRole] = useState<string>("admin"); // Rol por defecto
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 

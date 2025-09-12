@@ -150,52 +150,58 @@ const DocumentList: React.FC = () => {
   };
 
   useEffect(() => { fetchDocuments(); }, [token]);
+const handleUploadDocument = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setUploadLoading(true);
+  setUploadError(null);
 
-  const handleUploadDocument = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-    setUploadLoading(true);
-    setUploadError(null);
+  if (!uploadFile || !uploadTitle.trim() || !uploadDepartmentId || !uploadDocTypeId || !user || !user.company_id) {
+    setUploadError("Todos los campos son obligatorios.");
+    setUploadLoading(false);
+    return;
+  }
 
-    if (!uploadFile || !uploadTitle.trim() || !uploadDepartmentId || !uploadDocTypeId || !user) {
-      setUploadError("Todos los campos son obligatorios.");
-      setUploadLoading(false);
-      return;
-    }
-
+  try {
     const formData = new FormData();
-    formData.append('file', uploadFile);
     formData.append('title', uploadTitle);
-    formData.append('department_id', uploadDepartmentId);
-    formData.append('uploaded_by', user.id.toString());
-    formData.append('doc_type_id', uploadDocTypeId);
-    formData.append('company_id', user.company_id ? user.company_id.toString() : '0');
+    formData.append('department_id', String(Number(uploadDepartmentId))); // forzar integer
+    formData.append('doc_type_id', String(Number(uploadDocTypeId)));       // forzar integer
+    formData.append('uploaded_by', String(user.id));
+    formData.append('company_id', String(user.company_id));
+    formData.append('file', uploadFile);
 
-    try {
-      const res = await fetch("http://localhost:8000/documents/", {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
+    const res = await fetch("http://localhost:8000/documents/", {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error("Backend error:", errorData);
-        throw new Error(errorData.detail || 'Error desconocido');
-      }
-
-      setUploadTitle('');
-      setUploadDepartmentId('');
-      setUploadDocTypeId('');
-      setUploadFile(null);
-      setShowUploadModal(false);
-      await fetchDocuments();
-    } catch (err: unknown) {
-      console.error("Upload error:", err);
-      setUploadError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setUploadLoading(false);
+    if (!res.ok) {
+      const errorData = await res.json();
+      const message = Array.isArray(errorData.detail)
+        ? errorData.detail.map((e: { msg: any; }) => e.msg || JSON.stringify(e)).join(', ')
+        : 'Error desconocido';
+      throw new Error(message);
     }
-  };
+
+    setUploadTitle('');
+    setUploadDepartmentId('');
+    setUploadDocTypeId('');
+    setUploadFile(null);
+    setShowUploadModal(false);
+    await fetchDocuments();
+
+  } catch (err: unknown) {
+    console.error("Upload error:", err);
+    setUploadError(err instanceof Error ? err.message : 'Error desconocido');
+  } finally {
+    setUploadLoading(false);
+  }
+};
+
+
 
   const handleDeleteDocument = async (documentId: number): Promise<void> => {
     if (!window.confirm("¿Seguro que deseas eliminar este documento?")) return;
