@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import './Documents.css';
 import Modal from '../../components/Modal'; 
 import Select from '../../components/Select'; 
+import { DocumentService } from '../../services/documentService';
 
 interface Document {
   id: number;
@@ -238,6 +239,20 @@ const handleUploadDocument = async (e: React.FormEvent<HTMLFormElement>) => {
       (filterType === '' || doc.doc_type === filterType)
   );
 
+  const [showJsonModal, setShowJsonModal] = useState<boolean>(false);
+const [documentJson, setDocumentJson] = useState<any>(null);
+
+const handleViewDocument = async (documentId: number) => {
+  try {
+    if (!token) return;
+    const data = await DocumentService.getDocumentJson(token, documentId);
+    setDocumentJson(data); // 👈 Aquí guardamos el JSON del backend
+    setShowJsonModal(true);
+  } catch (err) {
+    console.error("Error al obtener JSON:", err);
+  }
+};
+
   return (
     <div className="document-list-page container">
       <h1 className="page-title">Gestión de Documentos</h1>
@@ -297,7 +312,14 @@ const handleUploadDocument = async (e: React.FormEvent<HTMLFormElement>) => {
                     <td>{doc.uploadDate}</td>
                     <td>{doc.doc_type}</td>
                     <td>
-                      <Button variant="secondary" style={{ marginRight: '10px' }}>Ver</Button>
+                      <Button 
+                        variant="secondary" 
+                        style={{ marginRight: '10px' }}
+                        onClick={() => handleViewDocument(doc.id)}
+                      >
+                        Ver
+                      </Button>
+
                       <Button variant="danger" onClick={() => handleDeleteDocument(doc.id)}>Eliminar</Button>
                     </td>
                   </tr>
@@ -348,7 +370,53 @@ const handleUploadDocument = async (e: React.FormEvent<HTMLFormElement>) => {
           </form>
         </Modal>
       )}
+      {showJsonModal && (
+  <Modal title="Contenido del Documento" onClose={() => setShowJsonModal(false)}>
+    {documentJson?.tables && documentJson.tables.length > 0 ? (
+      <div>
+        {documentJson.tables.map((table: any, index: number) => (
+          <div key={index} style={{ marginBottom: '20px' }}>
+            <h3>{table.name}</h3>
+            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+              <thead>
+                <tr>
+                  {table.headers.map((header: string, i: number) => (
+                    <th 
+                      key={i} 
+                      style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#0a0a0aff' }}
+                    >
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {table.rows.map((row: any[], rowIndex: number) => (
+                  <tr key={rowIndex}>
+                    {row.map((cell: any, cellIndex: number) => (
+                      <td 
+                        key={cellIndex} 
+                        style={{ border: '1px solid #ddd', padding: '8px' }}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p>No se encontraron tablas en el documento.</p>
+    )}
+  </Modal>
+)}
+
+
     </div>
+    
   );
 };
 

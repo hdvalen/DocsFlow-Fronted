@@ -6,10 +6,9 @@ export interface DocumentUploadPayload {
   company_id: number;
   file: File;
 }
-
 export const DocumentService = {
   getDocuments: async (token: string) => {
-    const res = await fetch('https://tu-api.com/documents', {
+    const res = await fetch('http://localhost:8000/documents/', {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -17,6 +16,17 @@ export const DocumentService = {
 
     if (!res.ok) throw new Error('No se pudieron obtener los documentos');
     return res.json();
+  },
+
+  getDocumentJson: async (token: string, document_id: number) => {
+    const res = await fetch(`http://localhost:8000/documents/${document_id}/extract`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) throw new Error('No se pudo obtener el JSON del documento');
+    return res.json(); // 👈 Aquí recibes las tablas en JSON
   },
 
   uploadDocument: async (token: string, payload: DocumentUploadPayload) => {
@@ -28,7 +38,7 @@ export const DocumentService = {
     formData.append('company_id', payload.company_id.toString());
     formData.append('file', payload.file);
 
-    const res = await fetch('https://tu-api.com/documents', {
+    const res = await fetch('http://localhost:8000/documents/', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -41,7 +51,7 @@ export const DocumentService = {
   },
 
   deleteDocument: async (token: string, documentId: number) => {
-    const res = await fetch(`https://tu-api.com/documents/${documentId}`, {
+    const res = await fetch(`http://localhost:8000/documents/${documentId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
